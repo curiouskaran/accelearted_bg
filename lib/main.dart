@@ -11,6 +11,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Panorama',
       theme: ThemeData.dark(),
+      debugShowCheckedModeBanner: false,
       home: MyHomePage(title: 'Flutter Panorama'),
     );
   }
@@ -30,11 +31,7 @@ class _MyHomePageState extends State<MyHomePage> {
   double _lat = 0;
   double _tilt = 0;
   int _panoId = 0;
-  List<Image> panoImages = [
-    Image.asset('assets/images/pan.jpg'),
-    Image.asset('assets/images/pan.jpg'),
-    Image.asset('assets/images/pan.jpg'),
-  ];
+  Image panoImage = Image.asset('assets/images/pan.jpg');
   ImagePicker picker = ImagePicker();
 
   void onViewChanged(longitude, latitude, tilt) {
@@ -71,10 +68,14 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    Widget panorama;
-    switch (_panoId % panoImages.length) {
-      case 0:
-        panorama = Panorama(
+    
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.title!),
+      ),
+      body: Stack(
+        children: [
+          Panorama(
           animSpeed: 1.0,
           sensorControl: SensorControl.Orientation,
           onViewChanged: onViewChanged,
@@ -106,52 +107,7 @@ class _MyHomePageState extends State<MyHomePage> {
               widget: hotspotButton(icon: Icons.arrow_upward, onPressed: () {}),
             ),
           ],
-        );
-        break;
-      case 2:
-        panorama = Panorama(
-          animSpeed: 1.0,
-          sensorControl: SensorControl.Orientation,
-          onViewChanged: onViewChanged,
-          croppedArea: Rect.fromLTWH(2533.0, 1265.0, 5065.0, 2533.0),
-          croppedFullWidth: 10132.0,
-          croppedFullHeight: 5066.0,
-          child: Image.asset('assets/panorama_cropped.jpg'),
-          hotspots: [
-            Hotspot(
-              latitude: 0.0,
-              longitude: -46.0,
-              width: 90.0,
-              height: 75.0,
-              widget: hotspotButton(text: "Next scene", icon: Icons.double_arrow, onPressed: () => setState(() => _panoId++)),
-            ),
-          ],
-        );
-        break;
-      default:
-        panorama = Panorama(
-          animSpeed: 1.0,
-          sensorControl: SensorControl.Orientation,
-          onViewChanged: onViewChanged,
-          child: panoImages[_panoId % panoImages.length],
-          hotspots: [
-            Hotspot(
-              latitude: 0.0,
-              longitude: 160.0,
-              width: 90.0,
-              height: 75.0,
-              widget: hotspotButton(text: "Next scene", icon: Icons.double_arrow, onPressed: () => setState(() => _panoId++)),
-            ),
-          ],
-        );
-    }
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title!),
-      ),
-      body: Stack(
-        children: [
-          panorama,
+        ),
           Text('${_lon.toStringAsFixed(3)}, ${_lat.toStringAsFixed(3)}, ${_tilt.toStringAsFixed(3)}'),
         ],
       ),
@@ -159,11 +115,14 @@ class _MyHomePageState extends State<MyHomePage> {
         mini: true,
         onPressed: () async {
           final pickedFile = await picker.getImage(source: ImageSource.gallery);
+          print('picked file------------------------------------>');
+          print(pickedFile);
           setState(() {
             if (pickedFile != null) {
-              panoImages.add(Image.file(File(pickedFile.path)));
-              _panoId = panoImages.length - 1;
+              panoImage = Image.file(File(pickedFile.path));
             }
+            print("here------------------------------------------>");
+            print(panoImage);
           });
         },
         child: Icon(Icons.panorama),
